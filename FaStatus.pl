@@ -21,7 +21,7 @@ sub SingleFa(){
 	my $reads=0;
 	while(<IN>){
 		if ($_!~/^>/){
-		 	my $seq=<IN>; chomp $seq;
+		 	my $seq=$_; chomp $seq;
 			$leng+=length($seq);
 		}elsif ($_=~/^>/){
 			$reads+=1;
