@@ -32,6 +32,6 @@ sub SingleFa(){
 		}
 	}
 	close IN;
-	print "$fq: $reads reads,\t$leng bp\n";
+	print "$fa: $reads reads,\t$leng bp\n";
 	return($reads,$leng);
 }
