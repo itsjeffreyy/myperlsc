@@ -18,6 +18,7 @@ while(<IN1>){
 	foreach my $e (@ex){
 		if($_=~/$e/){
 			$check =1;
+			last;
 		}
 	}
 	if($check == 0){
