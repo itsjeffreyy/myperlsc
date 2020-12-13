@@ -53,7 +53,7 @@ sub SingleFa(){
 	close IN;
 	my $reads_show=&commify($reads);
 	my $leng_show=&commify($leng);
-	print "$fq: $reads_show reads,\t$leng_show bp\n";
+	print "$fa: $reads_show reads,\t$leng_show bp\n";
 	return($reads,$leng);
 }
 
