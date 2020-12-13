@@ -16,6 +16,12 @@ foreach(@ARGV){
 my $mean_leng=&Mean_Leng($total_reads, $total_leng);
 my ($n50,$l50)=&N50($total_leng);
 
+$total_reads=&commify($total_reads);
+$total_leng=&commify($total_leng);
+$mean_leng=&commify($mean_leng);
+$l50=&commify($l50);
+$n50=&commify($n50);
+
 print "Total reads: $total_reads\nTotal length(bp): $total_leng\n";
 print "Mean length (bp): $mean_leng\n";
 print "N50 (bp): $n50\nL50: $l50\n";
@@ -41,7 +47,9 @@ sub SingleFq(){
 		}
 	}
 	close IN;
-	print "$fq: $reads reads,\t$leng bp\n";
+	my $reads_show=&commify($reads);
+	my $leng_show=&commify($leng);
+	print "$fq: $reads_show reads,\t$leng_show bp\n";
 	return($reads,$leng);
 }
 
@@ -64,4 +72,8 @@ sub N50(){
 		}
 	}
 }
-
+sub commify {
+    my $text = reverse $_[0];
+    $text =~ s/(\d\d\d)(?=\d)(?!\d*\.)/$1,/g;
+    return scalar reverse $text;
+}

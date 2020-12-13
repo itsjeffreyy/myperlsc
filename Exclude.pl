@@ -16,7 +16,8 @@ while(<IN1>){
 	chomp;
 	my $check=0;
 	foreach my $e (@ex){
-		if($_=~/$e/){
+		#if($_=~/$e/){
+		if($_ eq $e){
 			$check =1;
 			last;
 		}
