@@ -36,7 +36,7 @@ if(-e $id[0]){
 foreach my $acc (@acce){
 	my $file="$acc\.$type";
 	if(-e $file){next;}
-	`wget -O $file "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=nuccore&id=$acc&rettype=$type&retmode=text"`;
+	`wget -O $file "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=nuccore&id=$acc&rettype=$type&retmode=text"`;
 }
 
 if($comname){
