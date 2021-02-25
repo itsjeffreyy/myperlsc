@@ -59,10 +59,9 @@ print "barcode\tRead number\tTotal base(bp)\n";
 foreach my $barcode (@barcode_dir){
 	my $readnum_per=sprintf("%2.2f",$barcode_readnum{$barcode}/$total_readnum*100);
 	my $basenum_per=sprintf("%2.2f",$barcode_basenum{$barcode}/$total_basenum*100);
-	print "$barcode\t".&commify($barcode_readnum{$barcode})." ($readnum_per\%)\t".&commify($barcode_basenum{$barcode})." ($basenum_per\%)\n";
+	print "$barcode,\t".&commify($barcode_readnum{$barcode})." ($readnum_per\%),\t".&commify($barcode_basenum{$barcode})." ($basenum_per\%)\n";
 }
-print "Total read number: ".&commify($total_readnum)."\n";
-print "Total base number: ".&commify($total_basenum)." bp\n";
+print "Total,\t".&commify($total_readnum).",\t".&commify($total_basenum)."\n";
 
 ############################################################
 sub SingleFq(){
