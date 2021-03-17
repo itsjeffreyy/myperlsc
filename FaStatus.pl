@@ -3,6 +3,12 @@
 # writer: Jeffrey Yu
 use strict;
 use Data::Dumper;
+use Getopt::Long;
+
+my $deal;
+GetOptions(
+	"d|deal" => \$deal,
+);
 
 my $total_leng=0;
 my $total_reads=0;
@@ -31,15 +37,21 @@ print "N50 (bp): $n50\nL50: $l50\n";
 sub SingleFa(){
 	my $fa=shift(@_);
 	open(IN,"<$fa")||die "open file $fa:$!\n";
+	my $id="";
 	my $leng=0;
 	my $r_leng=0;
 	my $reads=0;
 	while(<IN>){
+		chomp;
 		if ($_!~/^>/){
 		 	my $seq=$_; chomp $seq;
 			$leng+=length($seq);
 			$r_leng+=length($seq);
-		}elsif ($_=~/^>/){
+		}elsif ($_=~/^>(.+)/){
+
+			if($deal && $id){print"$fa: $id: $r_leng bp\n";}
+
+			$id=$1;
 			$reads+=1;
 			$leng_count{$r_leng}+=1 if $r_leng!=0;
 			$r_leng=0;
