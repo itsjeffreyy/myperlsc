@@ -13,7 +13,7 @@ if(defined $ARGV[1]){
 	}
 }
 
-open(FaOUT,">$prefix\.fa");
+open(FaOUT,">$prefix\.fasta");
 open(FqIN,"<$ARGV[0]")||die "open file $ARGV[0]:$!\n";
 while(<FqIN>){
 	if ($_=~/^\@(.+)/){
