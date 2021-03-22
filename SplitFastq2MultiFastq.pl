@@ -5,15 +5,15 @@ use Getopt::Long;
 
 # variable
 my $split=1;
-my $fq_f=$ARGV[0];
-
-# extract the file head
-my ($fq_h)=$fq_f=~/(.+)(?:fq|fastq)/;
 
 # options
 GetOptions(
 	"split|s=i" => \$split,
 );
+
+my $fq_f=$ARGV[0];
+# extract the file head
+my ($fq_h)=$fq_f=~/(.+)(?:.fq|.fastq)/;
 
 # check format
 open(IN,"<$fq_f")|| die "open Fstq $fq_f:$!\n";
@@ -28,8 +28,9 @@ if($l1!~/^@/ || $l3 !~/^+/){
 close IN;
 
 # check line number
-my $line_num=`wc -l $fq_f`; chomp $line_num;
-if($line%4 != 0){
+my @a=split(" ",`wc -l $fq_f`); chomp @a;
+my $line_num=$a[0];
+if($line_num % 4 != 0){
 	print "ERR: $fq_f not a Fastq file.\n";
 	exit;
 }
@@ -55,6 +56,7 @@ while(<IN>){
 		$file_num++;
 	}
 	if($reads_s==0){
+		open(OUT,">$fq_h-$file_num.fastq")||die "Write to $fq_h-$file_num.fastq: $!\n";
 	}
 
 	print OUT "$l1\n$l2\n$l3\n$l4\n";

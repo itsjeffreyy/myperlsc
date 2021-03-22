@@ -5,15 +5,15 @@ use Getopt::Long;
 
 # variable
 my $split=1;
-my $fa_f=$ARGV[0];
-
-# extract the file head
-my ($fa_h)=$fa_f=~/(.+)(?:fa|fasta)/;
 
 # options
 GetOptions(
 	"split|s=i" => \$split,
 );
+
+# extract the file head
+my $fa_f=$ARGV[0];
+my ($fa_h)=$fa_f=~/(.+)(?:.fa|.fasta)/;
 
 # check format
 open(IN,"<$fa_f")|| die "open Fasta $fa_f:$!\n";
@@ -26,8 +26,9 @@ if($l1!~/^>/ ){
 close IN;
 
 # check line number
-my $line_num=`wc -l $fa_f`; chomp $line_num;
-if($line%2 != 0){
+my @a=split(" ",`wc -l $fa_f`); chomp @a;
+my $line_num=$a[0];
+if($line_num % 2 != 0){
 	print "ERR: $fa_f not a Fasta file.\n";
 	exit;
 }
@@ -51,6 +52,7 @@ while(<IN>){
 		$file_num++;
 	}
 	if($reads_s==0){
+		open(OUT,">$fa_h-$file_num.fasta")||die "Write to $fa_h-$file_num.fasta: $!\n";
 	}
 
 	print OUT "$l1\n$l2\n";
