@@ -8,6 +8,7 @@ use Getopt::Long;
 my $min_leng=0;
 my $max_leng=0;
 my $fq="";
+my $out_n="";
 my $help;
 
 # get options
@@ -15,6 +16,7 @@ GetOptions(
 	"max|max_length=s" => \$max_leng,
 	"min|min_length=s" => \$min_leng,
 	"fq|fastq=s" => \$fq,
+	"o|outname=s" => \$out_n,
 	"help|h" => \$help,
 );
 
@@ -26,8 +28,12 @@ if($help){
 # make output fastq filename
 my $fn=`basename $fq`; chomp $fn;
 my ($basename)=$fn=~/(.+)\.(?:fastq|fq)/;
-my $outn=$basename."\_$min_leng\-$max_leng.fastq";
-
+my $outn="";
+if($out_n){
+	$outn=$out_n;
+}else{
+	$outn=$basename."\_$min_leng\-$max_leng.fastq";
+}
 # number formatter
 if($max_leng=~/\D+/){
 	$max_leng=&Number_formatter($max_leng);
@@ -85,6 +91,7 @@ Option:
     "max|max_length": maxmum read length (k; M; G; T)
     "min|min_length": minum read length (k; M; G; T)
     "fq|fastq": imput fastq file
+    "o|outname": output file name
     "help|h": show help message
 		
 EOF

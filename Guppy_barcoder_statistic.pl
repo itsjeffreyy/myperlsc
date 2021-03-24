@@ -27,7 +27,7 @@ if(! -e $barcoder_path){
 #my @barcode_dir=grep{$_=~/^barcode/} readdir DIR;
 #closedir DIR;
 my @list=`ls $barcoder_path`; chomp @list;
-my @barcode_dir = grep {$_=~/^barcode/} @list;
+my @barcode_dir = grep {$_=~/(?:^barcode|^BC)/} @list;
 
 # check unclassified folder
 if(-e "$barcoder_path/unclassified"){
