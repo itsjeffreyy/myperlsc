@@ -5,7 +5,7 @@ use Getopt::Long;
 
 my $leng_between_primer_min="";
 my $leng_between_primer_max="";
-my $scan_leng=200;
+my $scan_leng=50;
 my $mismatch_cut=5;
 my $help;
 
@@ -56,7 +56,7 @@ while(<IN>){
 	my $seq_leng=length($l2);
 	my $primers_leng=length($F1)+length($F2);
 	if($seq_leng <= $primers_leng ){next;}
-	if($seq_leng <= $scan_leng){next;}
+	if($seq_leng <= $scan_leng*2){next;}
 	#print "$l1\n";
 	#print "p1: $F1\np2: $F2\n";
 	#print "seq \t$l2\n";
@@ -68,6 +68,7 @@ while(<IN>){
 	#exit;
 	if(! $F1_i ||! $F2_i){next;}
 	my $amplicon_leng=($F2_i+length($F2)-1)-($F1_i-length($F1)+1)+1;
+	if($amplicon_leng < $primers_leng){next;}
 	if($leng_between_primer_min || $leng_between_primer_max){
 		if($leng_between_primer_min && $leng_between_primer_max){
 			if($leng_between_primer_min <= $amplicon_leng && $amplicon_leng <= $leng_between_primer_max){print "\@$id\n$l2\n$l3\n$l4\n";}
@@ -193,7 +194,7 @@ sub Help{
 	Options:
 		maxlength|maxl: the maximum length of fragment between two primers (default: deactivate)
 		minlength|minl: the minimum length of fragment between two primers (default: deactivate)
-		scan|s        : scan length from two ends of a read (default: 200)
+		scan|s        : scan length from two ends of a read (default: 50)
 		mismatch|mm   : alow mismatch (default: 5)
 		help|h        : Show this help messsage
 
