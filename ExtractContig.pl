@@ -18,7 +18,8 @@ my $sequence="";
 open(IN,"<$ARGV[0]")||die"open file $ARGV[0]:$!\n";
 while(<IN>){
 	chomp $_;
-	if($_=~/^(>.*$contig.*)/){
+	if($_=~/^(>$contig)/){
+	#if($_ eq ">$contig"){
 		print "$1\n";
 		$sequence="";
 		while(<IN>){
