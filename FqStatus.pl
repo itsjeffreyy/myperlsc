@@ -30,23 +30,44 @@ print "N50 (bp): $n50\nL50: $l50\n";
 ############################################################
 sub SingleFq(){
 	my $fq=shift(@_);
-	open(IN,"<$fq")||die "open file $fq:$!\n";
 	my $leng=0;
 	my $reads=0;
-	while(<IN>){
-		if ($_=~/^@/){
-		 	my $seq=<IN>; chomp $seq;
-			$reads+=1;
-			$leng+=length($seq);
-			$leng_count{length($seq)}+=1;
-			<IN>;<IN>;
-		}else{
-			print "ERR: $fq is not fastq.\n";
-			close IN;
-			return (0,0);
+
+	if($fq=~/\.fastq$|\.fq$/){	
+		open(IN,"<$fq")||die "open file $fq:$!\n";
+		while(<IN>){
+			if ($_=~/^@/){
+			 	my $seq=<IN>; chomp $seq;
+				$reads+=1;
+				$leng+=length($seq);
+				$leng_count{length($seq)}+=1;
+				<IN>;<IN>;
+			}else{
+				print "ERR: $fq is not fastq.\n";
+				close IN;
+				return (0,0);
+			}
+		}
+		close IN;
+	}elsif($fq=~/\.fastq\.gz$|\.fq\.gz$/){
+		my @fq_c=`zcat $fq`; chomp @fq_c;
+		while(@fq_c){
+			my $c=shift(@fq_c);
+			if ($c=~/^@/){
+			 	my $seq=shift(@fq_c); chomp $seq;
+				$reads+=1;
+				$leng+=length($seq);
+				$leng_count{length($seq)}+=1;
+				shift(@fq_c);shift(@fq_c);
+			}else{
+				print "ERR: $fq is not fastq.\n";
+				close IN;
+				return (0,0);
+			}
+		
 		}
 	}
-	close IN;
+	
 	my $reads_show=&commify($reads);
 	my $leng_show=&commify($leng);
 	print "$fq: $reads_show reads,\t$leng_show bp\n";

@@ -42,7 +42,7 @@ my ($total_readnum,$total_basenum)=(0,0);
 
 foreach my $dir_n (@barcode_dir){
 	opendir (DIR,"$barcoder_path/$dir_n") || die "Cannot open $barcoder_path/$dir_n: $!\n";
-	my @fq_fs=grep {$_=~/\.fastq$|\.fq$/} readdir DIR;
+	my @fq_fs=grep {$_=~/\.fastq|\.fq/} readdir DIR;
 	closedir DIR;
 
 	foreach my $fq (@fq_fs){
@@ -68,22 +68,41 @@ sub SingleFq(){
 
 	my ($readnum,$basenum)=(0,0);
 	my $fq_f=shift(@_);
-	open(IN,"<$fq_f")|| die "ERR: Cannot open $fq_f: $!\n";
-	while(<IN>){
-		my $title=$_; chomp $title;
-		my $seq=<IN>; chomp $seq;
-		my $l3=<IN>; chomp $l3;
-		my $qua=<IN>; chomp $qua;
+	if($fq_f=~/\.fastq$|\.fq$/){
+		open(IN,"<$fq_f")|| die "ERR: Cannot open $fq_f: $!\n";
+		while(<IN>){
+			my $title=$_; chomp $title;
+			my $seq=<IN>; chomp $seq;
+			my $l3=<IN>; chomp $l3;
+			my $qua=<IN>; chomp $qua;
 
-		# check format
-		if($title!~/^\@/ || $l3!~/^\+/ || length($seq) != length($qua)){
-			print "ERR: $fq_f NOT fastq format!\n";
-			exit;
+			# check format
+			if($title!~/^\@/ || $l3!~/^\+/ || length($seq) != length($qua)){
+				print "ERR: $fq_f NOT fastq format!\n";
+				exit;
+			}
+			$readnum++;
+			$basenum+=length($seq);
 		}
-		$readnum++;
-		$basenum+=length($seq);
+		close IN;
+	}elsif($fq_f=~/\.fastq\.gz$|\.fq\.gz$/){
+		my @fq_c=`zcat $fq_f`; chomp @fq_c;
+		while (@fq_c){
+			my $title=shift(@fq_c); chomp $title;
+			my $seq=shift(@fq_c); chomp $seq;
+			my $l3=shift(@fq_c); chomp $l3;
+			my $qua=shift(@fq_c); chomp $qua;
+
+			# check format
+			if($title!~/^\@/ || $l3!~/^\+/ || length($seq) != length($qua)){
+				print "ERR: $fq_f NOT fastq.gz format!\n";
+				exit;
+			}
+			$readnum++;
+			$basenum+=length($seq);
+		
+		}
 	}
-	close IN;
 	return($readnum,$basenum);
 }
 
