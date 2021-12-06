@@ -4,7 +4,7 @@ use Data::Dumper;
 use Getopt::Long;
 # medaka+trf
 # Requirment:
-# minimap2, Medaka (medaka_consensus, medaka_variant), samtools, ExtractReadfromSAMwithbed_Cover_target.pl, SeperateFq4Medaka_consensus.pl, Fq2fa.pl, Seperate_HP_fq_from_Medaka_variant_sam.pl, SeperateFq4Medaka_consensus.pl
+# LRA, Medaka (medaka_consensus, medaka_variant), samtools, ExtractReadfromSAMwithbed_Cover_target.pl, SeperateFq4Medaka_consensus.pl, Fq2fa.pl, Seperate_HP_fq_from_Medaka_variant_sam.pl, SeperateFq4Medaka_consensus.pl
 
 my $ref_f="/home/hgt/Projects/RD_cas9/code/chr8.fa";
 my $bed_f="/home/hgt/Projects/RD_cas9/code/SAMD12_region.bed";
@@ -36,11 +36,20 @@ if(! $sam_f || ! -e $sam_f){
 		$fq_head=$1;
 	}
 
+	my $ref_index1=$ref_f.".gli";
+	my $ref_index2=$ref_f.".mmi";
+	if(! -e $ref_index1 || ! -e $ref_index2){
+		`source ~/miniconda3/bin/activate; lra index $ref_f`;
+		#`lra index $ref_f`;
+	}
+
 	my $sam_f="$prefix\_$ref_head\_$fq_head\.sam";
 	
-	print "\n[MSG] No SAM file $sam_f. Do minimap2 aign $fq_f to $ref_f.\n";
-	print "[CMD] minimap2 -ax map-ont -t $thread $ref_f $fq_f -o $sam_f\n\n";
-	`minimap2 -ax map-ont -t $thread $ref_f $fq_f -o $sam_f`;
+	print "\n[MSG] No SAM file $sam_f. Do LRA aign $fq_f to $ref_f.\n";
+	print "[CMD] lra align -ONT -t $thread $ref_f $fq_f -p s > $sam_f\n\n";
+	`lra align -ONT -t $thread $ref_f $fq_f -p s > $sam_f`;
+	#print "[CMD] minimap2 -ax map-ont -t $thread $ref_f $fq_f -o $sam_f\n\n";
+	#`minimap2 -ax map-ont -t $thread $ref_f $fq_f -o $sam_f`;
 }
 
 # extract the read almost cover target region
