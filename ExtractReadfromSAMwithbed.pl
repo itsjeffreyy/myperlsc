@@ -53,6 +53,8 @@ while(<IN>){
 
 		if($qe <= $refs || $refe <= $qs){next;}
 		$target_readid{$target}{$a[0]}=1;
+		print "$ref\t$refs\t$refe\t$a[0]\t$qs\t$qe\n";
+		
 	}
 }
 close IN;
@@ -63,29 +65,29 @@ close IN;
 #	}
 #}
 
-foreach my $t (@target){
-	if(-e "$prefix\_$t\_aligned.fastq"){
-		`rm -f $prefix\_$t\_aligned.fastq`;
-	}
-}
-
-# extract read fastq
-# load fastq
-open(IN,"<$ARGV[2]") || die "Cannot open $ARGV[2]: $!\n";
-while(<IN>){
-	my ($id)=$_=~/^\@(\S+)/; chomp $id;
-	my $seq=<IN>; chomp $seq;
-	my $l3=<IN>; chomp $l3;
-	my $qua=<IN>; chomp $qua;
-	foreach my $t (keys %target_readid){
-		if($target_readid{$t}{$id}){
-			open(OUT,">>$prefix\_$t\_aligned.fastq")|| die "Cannot write $prefix\_$t\_aligned.fastq: $!\n";
-			print OUT "\@$id\n$seq\n$l3\n$qua\n";
-			close OUT;
-		}
-	}
-}
-close IN;
+#foreach my $t (@target){
+#	if(-e "$prefix\_$t\_aligned.fastq"){
+#		`rm -f $prefix\_$t\_aligned.fastq`;
+#	}
+#}
+#
+## extract read fastq
+## load fastq
+#open(IN,"<$ARGV[2]") || die "Cannot open $ARGV[2]: $!\n";
+#while(<IN>){
+#	my ($id)=$_=~/^\@(\S+)/; chomp $id;
+#	my $seq=<IN>; chomp $seq;
+#	my $l3=<IN>; chomp $l3;
+#	my $qua=<IN>; chomp $qua;
+#	foreach my $t (keys %target_readid){
+#		if($target_readid{$t}{$id}){
+#			open(OUT,">>$prefix\_$t\_aligned.fastq")|| die "Cannot write $prefix\_$t\_aligned.fastq: $!\n";
+#			print OUT "\@$id\n$seq\n$l3\n$qua\n";
+#			close OUT;
+#		}
+#	}
+#}
+#close IN;
 
 ############################################################
 sub ParseCIGAR(){

@@ -73,8 +73,8 @@ close IN;
 #}
 
 foreach my $t (@target){
-	if(-e "$prefix\_$t\_aligned.fastq"){
-		`rm -f $prefix\_$t\_aligned.fastq`;
+	if(-e "$prefix\_$t\_covered.fastq"){
+		`rm -f $prefix\_$t\_covered.fastq`;
 	}
 }
 
@@ -88,7 +88,7 @@ while(<IN>){
 	my $qua=<IN>; chomp $qua;
 	foreach my $t (keys %target_readid){
 		if($target_readid{$t}{$id}){
-			open(OUT,">>$prefix\_$t\_aligned.fastq")|| die "Cannot write $prefix\_$t\_aligned.fastq: $!\n";
+			open(OUT,">>$prefix\_$t\_covered.fastq")|| die "Cannot write $prefix\_$t\_covered.fastq: $!\n";
 			print OUT "\@$id\n$seq\n$l3\n$qua\n";
 			close OUT;
 		}
