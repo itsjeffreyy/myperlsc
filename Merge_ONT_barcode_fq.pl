@@ -4,19 +4,32 @@ use Data::Dumper;
 use Getopt::Long;
 
 my $out_name="raw_read";
+my @fqfs=();
+my $help="";
 GetOptions(
 	"o|out=s" => \$out_name,
+	"fq|fastq=s{,}" => \@fqfs,
+	"h|help" => \$help,
 );
 
 $out_name.=".fastq";
 
+if($help){&help;}
+if(scalar @fqfs ==0){
+	print "[ERR] No input fastq files.\n";
+	&help;
+}
 # open a output fastq file
 open(OUT,">$out_name")|| die "Cannot write to $out_name!\n";
 
 # load multiple fastq or fastq.gz
-my @fqfs=@ARGV;
 
 foreach my $fqf (@fqfs){
+	if(! -e $fqf){
+		print "[ERR] $fqf not exist.\n";
+		&help;
+	}
+
 	# check comprassion stat
 	if($fqf=~/\.fastq$|\.fq$/){	
 
@@ -43,3 +56,17 @@ foreach my $fqf (@fqfs){
 	}
 }
 close OUT;
+
+############################################################
+sub help{
+print <<EOF;
+Usage: 
+	Merge_ONT_barcode_fq.pl -fq fastq_pass/*.fastq fastq_fail/*.fastq... -o prefix_name
+Options:
+	-o | -out    : output file prefix name (default: raw_read. The output name: raw_read.fastq)
+	-fq | -fastq : input multiple fastq files
+	-h | -help   : show this help message
+
+EOF
+exit;
+}
