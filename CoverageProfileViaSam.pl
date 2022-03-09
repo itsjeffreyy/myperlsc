@@ -62,6 +62,7 @@ if (@bamfile){
 foreach my $sam (@samfile){
 	open(IN,"<$sam")||die"open file $sam:$!\n";
 	while(<IN>){
+		if($_=~/^@/){next;}
 		chomp;
 		my @a=split("\t",$_);
 # rid :read id
@@ -89,11 +90,13 @@ while(<IN>){
 }
 close IN;
 
+
 # record the counts of a read alignment.
 my %readcount=();
 foreach my $rid (keys %ridalign){
 	$readcount{$rid}=scalar @{$ridalign{$rid}};
 }
+
 
 my %cidcov=();
 foreach my $rid (keys %ridalign){
