@@ -39,7 +39,7 @@ if(! $sam_f || ! -e $sam_f){
 	my $ref_index1=$ref_f.".gli";
 	my $ref_index2=$ref_f.".mmi";
 	if(! -e $ref_index1 || ! -e $ref_index2){
-		`source ~/miniconda3/bin/activate; lra index $ref_f`;
+		`lra index $ref_f`;
 		#`lra index $ref_f`;
 	}
 

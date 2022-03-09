@@ -47,6 +47,7 @@ while(<IN>){
 	chomp;
 	if($_=~/^@/){next;}
 	my @a=split("\t",$_);
+	if($a[1] eq '4'){next;}
 	foreach my $target (keys %target_region){
 		my ($ref,$refs,$refe)=split("\t",$target_region{$target});
 		if($a[2] ne $ref){next;}
