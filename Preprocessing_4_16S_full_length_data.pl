@@ -35,12 +35,14 @@ my @barcode=();
 my $thread=4;
 my $my_script="conda_activate_script.sh";
 my $help;
+my $rm_s;
 
 GetOptions(
 	"d|dir=s" => \$dir,
 	"b|barcode=s{,}" => \@barcode,
 	"t|thread=i" => \$thread,
 	"h|help" => \$help,
+	"rm" => \$rm_s,
 );
 
 # help option function
@@ -161,8 +163,10 @@ foreach my $b (@barcode){
 	close OUT;
 }
 # remove the seperate fastq in the fastq_pass and fastq_fail directory
-print "[MSG] Remove the raw fastq_pass and fastq_fail folder...\n";
-system("rm -r $dir/fastq/fastq_*");
+if($rm_s){
+	print "[MSG] Remove the raw fastq_pass and fastq_fail folder...\n";
+	system("rm -r $dir/fastq/fastq_*");
+}
 
 print "[MSG] Finish processing\n\n";
 system("rm $my_script");
@@ -177,6 +181,7 @@ Options:
                      `fastq` directory must be included in the case directory.
 	-b|-barcode: The list barcode in this product case.
 	-t|-thread : execution CPU number
+	-rm        : remove the fastq_pass and fastq_fail folders
 	-h|-help   : Show this help information.
 
 EOF
