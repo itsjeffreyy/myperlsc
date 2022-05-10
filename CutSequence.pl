@@ -69,10 +69,11 @@ while(<IN>){
 			if($printseq){
 				my $psl=length($printseq);		
 				if($rc eq 0){
+					my $s=uc($printseq);
 					print "$printid\t$Tlength\t$range\t";
-					print "\+\t$psl\n$printseq\n";
+					print "\+\t$psl\n$s\n";
 				}elsif($rc eq 1){
-					my $s=RC($printseq);
+					my $s=uc(RC($printseq));
 					print "$printid\t$Tlength\t$range\t";
 					print "\-\t$psl\n$s\n";
 				}
