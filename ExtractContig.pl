@@ -20,7 +20,7 @@ while(<IN>){
 	chomp $_;
 	if($_=~/^(>$contig)/){
 	#if($_ eq ">$contig"){
-		print "$1\n";
+		print "$_\n";
 		$sequence="";
 		while(<IN>){
 			chomp $_;
