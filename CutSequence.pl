@@ -25,8 +25,8 @@ GetOptions(
 	"len|l=i" => \$len,
 	  );
 
-#print "get ctg id $id....\n";
-#print "open $ARGV[0]...\n";
+print "get ctg id $id....\n";
+print "open $ARGV[0]...\n";
 open(IN,"<$ARGV[0]")||die"open file $ARGV[0]:$!\n";
 while(<IN>){
 	chomp $_;

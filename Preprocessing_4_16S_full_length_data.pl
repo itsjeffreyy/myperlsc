@@ -31,18 +31,18 @@ use Getopt::Long;
 #        └── unclassified
 
 my $dir="";
+my $barcode_list="";
 my @barcode=();
 my $thread=4;
 my $my_script="conda_activate_script.sh";
 my $help;
-my $rm_s;
 
 GetOptions(
 	"d|dir=s" => \$dir,
+	"bl|barcode_list=s" => \$barcode_list,
 	"b|barcode=s{,}" => \@barcode,
 	"t|thread=i" => \$thread,
 	"h|help" => \$help,
-	"rm" => \$rm_s,
 );
 
 # help option function
@@ -61,6 +61,12 @@ if(! -e "$dir/fastq"){
 	print "ERR: Directory $dir/fastq not exist!\n";
 	print "Abort!!\n";
 	&Help;
+}
+
+if($barcode_list){
+	open(IN,"<$barcode_list")|| die "Cannot open $barcode_list: $!\n";
+	@barcode=<IN>; chomp @barcode;
+	close IN;
 }
 
 if(!@barcode){
@@ -98,7 +104,7 @@ foreach (@barcode){
 # raw data
 if(! -e "$dir/NanoPlot_QC"){
 	print "[MSG] Create directory $dir/NanoPlot_QC...\n";
-	system("mkdir $dir/NanoPlot_QC");
+	system("mkdir -p $dir/NanoPlot_QC");
 }
 
 open(OUT,">>$my_script")|| die "Cannot write $my_script\n";
@@ -163,10 +169,8 @@ foreach my $b (@barcode){
 	close OUT;
 }
 # remove the seperate fastq in the fastq_pass and fastq_fail directory
-if($rm_s){
-	print "[MSG] Remove the raw fastq_pass and fastq_fail folder...\n";
-	system("rm -r $dir/fastq/fastq_*");
-}
+print "[MSG] Remove the raw fastq_pass and fastq_fail folder...\n";
+#system("rm -r $dir/fastq/fastq_*");
 
 print "[MSG] Finish processing\n\n";
 system("rm $my_script");
@@ -177,12 +181,12 @@ print <<EOF;
 Command: 
 	Preprocessing_4_16S_full_length_data.pl -dir dir -barcode barcode01 barcode02 ...
 Options:
-	-d|-dir    : The directory of 16S full length product case. 
-                     `fastq` directory must be included in the case directory.
-	-b|-barcode: The list barcode in this product case.
-	-t|-thread : execution CPU number
-	-rm        : remove the fastq_pass and fastq_fail folders
-	-h|-help   : Show this help information.
+	-d|-dir          : The directory of 16S full length product case. 
+                           `fastq` directory must be included in the case directory.
+	-bl|-barcode_list: The barcode you wanted in a list file.
+	-b|-barcode      : The list barcode in this product case.
+	-t|-thread       : execution CPU number
+	-h|-help         : Show this help information.
 
 EOF
 exit;
