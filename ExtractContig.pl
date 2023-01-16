@@ -1,41 +1,81 @@
 #!/usr/bin/perl -w
 # writer: Jeffreyy Yu
-# uasage: ExtractContig.pl [option] .fa contig
+# uasage: ExtractContig.pl [option] .fa keyword
 # r : Reverse complement
+# default is match mode
 
 use strict;
 use Getopt::Long;
 use Data::Dumper;
 
 my $rc=0;
+my $mode='match'; #match, simulate
+my $fasta="";
+my $keyword="";
 
 GetOptions(
 	   "rc|r" => \$rc,
-	  );
+	   "mode|m=s" => \$mode,
+	   "fasta|fa=s" => \$fasta,
+	   "keyword|kw=s" => \$keyword,
+);
 
-my $contig=$ARGV[1];
+if(! $keyword){
+	print "[ERR] No keyword. Enter the keyword with the option -kw.\n";
+	exit;
+}
+
+if(! -e $fasta){
+	print "[ERR] No Fasta file. Enter the fasta file with the option -fa.\n";
+	exit;
+}
+
+
 my $sequence="";
-open(IN,"<$ARGV[0]")||die"open file $ARGV[0]:$!\n";
+open(IN,"<$fasta")||die"open file $fasta:$!\n";
 while(<IN>){
-	chomp $_;
-	if($_=~/^(>$contig)/){
-	#if($_ eq ">$contig"){
-		print "$_\n";
-		$sequence="";
-		while(<IN>){
-			chomp $_;
-			if($_!~/^>/){
-				$sequence.=$_;
-			}else{
-				seek(IN,-length($_),1);
-				last;
+	chomp;
+
+	if($mode eq 'match'){
+		if($_ eq ">$keyword"){
+			print "$_\n";
+			$sequence="";
+			while(<IN>){
+				chomp $_;
+				if($_!~/^>/){
+					$sequence.=$_;
+				}else{
+					seek(IN,-length($_),1);
+					last;
+				}
+			}
+			if($rc eq 0){
+				print "$sequence\n";
+			}elsif($rc eq 1){
+				my $s=RC($sequence);
+				print "$s\n";
 			}
 		}
-		if($rc eq 0){
-			print "$sequence\n";
-		}elsif($rc eq 1){
-			my $s=RC($sequence);
-			print "$s\n";
+
+	}elsif($mode eq 'simulate'){	
+		if($_=~/^(>$keyword)/){
+			print "$_\n";
+			$sequence="";
+			while(<IN>){
+				chomp $_;
+				if($_!~/^>/){
+					$sequence.=$_;
+				}else{
+					seek(IN,-length($_),1);
+					last;
+				}
+			}
+			if($rc eq 0){
+				print "$sequence\n";
+			}elsif($rc eq 1){
+				my $s=RC($sequence);
+				print "$s\n";
+			}
 		}
 	}
 }
