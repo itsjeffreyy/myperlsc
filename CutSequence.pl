@@ -10,7 +10,7 @@ use Data::Dumper;
 use Getopt::Long;
 
 my $rc=0;
-my $id=$ARGV[1];
+my $id="";
 my $printid="";
 my $start="";
 my $end="";
@@ -18,16 +18,24 @@ my $len="";
 my $sequence="";
 my $printseq="";
 my $Tlength="";
+my $fa_f="";
+
 GetOptions(
 	"rc|r" => \$rc,
 	"start|s=i" => \$start,
 	"end|e=i" => \$end,
 	"len|l=i" => \$len,
+	"id=s" => \$id,
+	"fa|fasta=s" => \$fa_f,
 	  );
 
+if(!$id || !$fa_f){
+	print "[ERR] No id or No Fasta file.\n Abort\n"; exit;
+}
+
 print "get ctg id $id....\n";
-print "open $ARGV[0]...\n";
-open(IN,"<$ARGV[0]")||die"open file $ARGV[0]:$!\n";
+print "open $fa_f...\n";
+open(IN,"<$fa_f")||die"open file $fa_f:$!\n";
 while(<IN>){
 	chomp $_;
 	$sequence="";

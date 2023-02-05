@@ -6,16 +6,20 @@ use Data::Dumper;
 
 my $total_leng=0;
 my $total_reads=0;
+my $total_q=0;
 my %leng_count=();
 foreach(@ARGV){
-	my($reads,$leng)=&SingleFq($_);
+	my($reads,$leng,$q_sum)=&SingleFq($_);
 	$total_leng+=$leng;
 	$total_reads+=$reads;
+	$total_q+=$q_sum;
 }
 
 my $mean_leng=&Mean_Leng($total_reads, $total_leng);
 my ($n50,$l50)=&N50($total_leng);
 
+my $total_mean_q=sprintf("%.2f",$total_q/$total_leng);
+my $total_mean_q_show=&commify($total_mean_q);
 $total_reads=&commify($total_reads);
 $total_leng=&commify($total_leng);
 $mean_leng=&commify($mean_leng);
@@ -24,6 +28,7 @@ $n50=&commify($n50);
 
 print "Total reads: $total_reads\nTotal length(bp): $total_leng\n";
 print "Mean length (bp): $mean_leng\n";
+print "Mean quality score: $total_mean_q_show\n";
 print "N50 (bp): $n50\nL50: $l50\n";
 
 
@@ -32,6 +37,8 @@ sub SingleFq(){
 	my $fq=shift(@_);
 	my $leng=0;
 	my $reads=0;
+	my $qscore_sum=0;
+	my $mean_q=0;
 
 	if($fq=~/\.fastq$|\.fq$/){	
 		open(IN,"<$fq")||die "open file $fq:$!\n";
@@ -41,7 +48,10 @@ sub SingleFq(){
 				$reads+=1;
 				$leng+=length($seq);
 				$leng_count{length($seq)}+=1;
-				<IN>;<IN>;
+				<IN>;
+				my $q_score=<IN>; chomp $q_score;
+				my ($qscore_sum_r,$mean_q_r)=&qscore_sum($q_score);
+				$qscore_sum+=$qscore_sum_r;
 			}else{
 				print "ERR: $fq is not fastq.\n";
 				close IN;
@@ -58,7 +68,10 @@ sub SingleFq(){
 				$reads+=1;
 				$leng+=length($seq);
 				$leng_count{length($seq)}+=1;
-				shift(@fq_c);shift(@fq_c);
+				shift(@fq_c);
+				my $q_score=shift(@fq_c); chomp $q_score;
+				my ($qscore_sum_r,$mean_q_r)=&qscore_sum($q_score);
+				$qscore_sum+=$qscore_sum_r;
 			}else{
 				print "ERR: $fq is not fastq.\n";
 				close IN;
@@ -68,10 +81,12 @@ sub SingleFq(){
 		}
 	}
 	
+	$mean_q=sprintf("%.2f",$qscore_sum/$leng);
+	my $mean_q_show=&commify($mean_q);
 	my $reads_show=&commify($reads);
 	my $leng_show=&commify($leng);
-	print "$fq: $reads_show reads,\t$leng_show bp\n";
-	return($reads,$leng);
+	print "$fq: $reads_show reads,\t$leng_show bp, mean_quality: $mean_q_show\n";
+	return($reads,$leng,$qscore_sum);
 }
 
 sub Mean_Leng(){
@@ -97,4 +112,18 @@ sub commify {
     my $text = reverse $_[0];
     $text =~ s/(\d\d\d)(?=\d)(?!\d*\.)/$1,/g;
     return scalar reverse $text;
+}
+
+sub qscore_sum {
+	my $qscore=shift(@_);
+
+	my $q_sum=0;
+	my $mean_q=0;
+	my @q=split("",$qscore);
+	my $q_leng=length($qscore);
+	foreach my $s (@q){
+		$q_sum+=ord($s)-33;
+	}
+	$mean_q=sprintf("%.2f",$q_sum/$q_leng);
+	return($q_sum,$mean_q);
 }
