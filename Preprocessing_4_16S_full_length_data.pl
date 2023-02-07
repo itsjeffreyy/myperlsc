@@ -34,7 +34,8 @@ my $dir="";
 my $barcode_list="";
 my @barcode=();
 my $thread=4;
-my $my_script="conda_activate_script.sh";
+my $my_script="conda_activate_execution.sh";
+my $act_script="nanoplot_act.sh";
 my $help;
 
 GetOptions(
@@ -52,14 +53,14 @@ if($help){
 
 # check the input options and directory.
 if(! -e $dir){
-	print "ERR: Directory $dir not exist!\n";
-	print "Abort!!\n";
+	print STDERR "ERR: Directory $dir not exist!\n";
+	print STDERR "Abort!!\n";
 	&Help;
 }
 
 if(! -e "$dir/fastq"){
-	print "ERR: Directory $dir/fastq not exist!\n";
-	print "Abort!!\n";
+	print STDERR "ERR: Directory $dir/fastq not exist!\n";
+	print STDERR "Abort!!\n";
 	&Help;
 }
 
@@ -70,8 +71,8 @@ if($barcode_list){
 }
 
 if(!@barcode){
-	print "ERR: No input barcode list\n\n";
-	print "Abort!!\n";
+	print STDERR "ERR: No input barcode list\n\n";
+	print STDERR "Abort!!\n";
 	&Help;
 }
 
@@ -83,41 +84,40 @@ foreach(@dir_bc){
 
 foreach (@barcode){
 	if(!$dir_bc{$_}){
-		print "$_ not in the sequencing case.\n";
-		print "Abort!!\n";
+		print STDERR "$_ not in the sequencing case.\n";
+		print STDERR "Abort!!\n";
 		&Help;
 	}
 } 
 
 # conda environment activate
 &Create_conda_activate;
-#system("bash -i ./conda_activate_script.sh");
-#system("bash ./conda_activate.sh");
-#`bash ./conda_activate.sh`;
-#system("source /home/hgt/miniconda3/bin/activate nanoplot");
-#system("conda activate nanoplot");
-#&Activate_conda;
-#system("bash","./act_conda.sh");
 
 
 # NanoPlot QC
 # raw data
 if(! -e "$dir/NanoPlot_QC"){
-	print "[MSG] Create directory $dir/NanoPlot_QC...\n";
+	print STDOUT "[MSG] Create directory $dir/NanoPlot_QC...\n";
 	system("mkdir -p $dir/NanoPlot_QC");
 }
 
-open(OUT,">>$my_script")|| die "Cannot write $my_script\n";
-foreach my $b (@barcode){
-	print OUT "echo \"[MSG] NanoPlot QC for $b...\"\n";
 
-	print OUT "NanoPlot -t $thread --fastq $dir/fastq/fastq_*/$b/* --plots dot --N50 -o $dir/NanoPlot_QC/$b\_raw\n";
-	print OUT "NanoPlot -t $thread --fastq $dir/fastq/fastq_pass/$b/* --plots dot --N50 -o $dir/NanoPlot_QC/$b\_pass\n";
+open(OUTact,">$act_script")|| die "Cannot create $act_script: $!\n";
+foreach my $b (@barcode){
+	#print STDOUT "[MSG] NanoPlot QC for $b...\n";
+	print OUTact "echo \"[MSG] NanoPlot QC for $b...\"\n";
+
+	#system("/home/hgt/miniconda3/envs/nanoplot/bin/NanoPlot -t $thread --fastq $dir/fastq/fastq_*/$b/* --plots dot --N50 -o $dir/NanoPlot_QC/$b\_raw");
+	#system("/home/hgt/miniconda3/envs/nanoplot/bin/NanoPlot -t $thread --fastq $dir/fastq/fastq_pass/$b/* --plots dot --N50 -o $dir/NanoPlot_QC/$b\_pass");
 	#system("NanoPlot -t $thread --fastq $dir/fastq/fastq_*/$b/* --plots dot --N50 -o $dir/NanoPlot_QC/$b\_raw");
-	#system("NanoPlot -t $thread --fastq $dir/fastq/fastq_pass/$b/* --plots dot --N50 -o $dir/NanoPlot_QC/$b\_pass");
+	#system("NanoPlot -t $thread --fastq $dir/fastq/fastq_*/$b/* --plots dot --N50 -o $dir/NanoPlot_QC/$b\_raw");
+	print OUTact "NanoPlot -t $thread --fastq $dir/fastq/fastq_*/$b/* --plots dot --N50 -o $dir/NanoPlot_QC/$b\_raw\n";
+	print OUTact "NanoPlot -t $thread --fastq $dir/fastq/fastq_pass/$b/* --plots dot --N50 -o $dir/NanoPlot_QC/$b\_pass\n";
 }
-close OUT;
-system("/bin/sh","$my_script");
+close OUTact;
+
+system("cat $act_script >> $my_script");
+system("bash $my_script");
 
 # Merge pass part fastq 
 foreach my $b (@barcode){
@@ -137,7 +137,7 @@ foreach my $b (@barcode){
 	
 	foreach my $fqf (@fqfs){
 		if(! -e $fqf){
-			print "[ERR] $fqf not exist.\n";
+			print STDERR "[ERR] $fqf not exist.\n";
 			&Help;
 		}
 	
@@ -153,7 +153,7 @@ foreach my $b (@barcode){
 				my $fq_content=`cat $fqf`;
 				print OUT "$fq_content";
 			}else{
-				print "ERR: $fqf is not fastq format.\n"; exit;
+				print STDERR "ERR: $fqf is not fastq format.\n"; exit;
 			}
 		}elsif($fqf=~/\.fastq\.gz$|\.fq\.gz$/){
 			my @fq_c=`zcat $fqf`; chomp @fq_c;
@@ -162,18 +162,18 @@ foreach my $b (@barcode){
 			if ($l1=~/^@/ && $l3=~/^\+/){
 				print OUT join("\n",@fq_c)."\n";
 			}else{
-				print "ERR: $fqf is not fastq format.\n";
+				print STDERR "ERR: $fqf is not fastq format.\n";
 			}
 		}
 	}
 	close OUT;
 }
 # remove the seperate fastq in the fastq_pass and fastq_fail directory
-print "[MSG] Remove the raw fastq_pass and fastq_fail folder...\n";
+#print "[MSG] Remove the raw fastq_pass and fastq_fail folder...\n";
 #system("rm -r $dir/fastq/fastq_*");
 
-print "[MSG] Finish processing\n\n";
-system("rm $my_script");
+print STDOUT "[MSG] Finish processing\n\n";
+system("rm $my_script $act_script");
 ############################################################
 sub Help{
 print <<EOF;
@@ -218,7 +218,9 @@ unset __conda_setup
 # <<< conda initialize <<<
 echo "[MSG] Activate conda noanoplot environment..."
 conda activate nanoplot
+
 EOF
+
 
 close OUT;
 }
