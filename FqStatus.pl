@@ -18,7 +18,7 @@ foreach(@ARGV){
 my $mean_leng=&Mean_Leng($total_reads, $total_leng);
 my ($n50,$l50)=&N50($total_leng);
 
-my $total_mean_q=sprintf("%.2f",$total_q/$total_leng);
+my $total_mean_q= ( $total_leng ==0 ? 0 : sprintf("%.2f",$total_q/$total_leng));
 my $total_mean_q_show=&commify($total_mean_q);
 $total_reads=&commify($total_reads);
 $total_leng=&commify($total_leng);
@@ -42,6 +42,16 @@ sub SingleFq(){
 
 	if($fq=~/\.fastq$|\.fq$/){	
 		open(IN,"<$fq")||die "open file $fq:$!\n";
+		my @ln=<IN>; chomp @ln;
+		my $ln=scalar @ln;
+		print "$ln\n";
+		if( $ln ==0){
+			close IN;
+			return (0,0);
+		}
+		close IN;
+
+		open(IN,"<$fq")||die "open file $fq:$!\n";
 		while(<IN>){
 			if ($_=~/^@/){
 			 	my $seq=<IN>; chomp $seq;
@@ -61,6 +71,12 @@ sub SingleFq(){
 		close IN;
 	}elsif($fq=~/\.fastq\.gz$|\.fq\.gz$/){
 		my @fq_c=`zcat $fq`; chomp @fq_c;
+
+		if((scalar @fq_c)==0){
+			close IN;
+			return (0,0);
+		}
+
 		while(@fq_c){
 			my $c=shift(@fq_c);
 			if ($c=~/^@/){
@@ -81,7 +97,7 @@ sub SingleFq(){
 		}
 	}
 	
-	$mean_q=sprintf("%.2f",$qscore_sum/$leng);
+	$mean_q=( $leng ==0 ? 0 : sprintf("%.2f",$qscore_sum/$leng));
 	my $mean_q_show=&commify($mean_q);
 	my $reads_show=&commify($reads);
 	my $leng_show=&commify($leng);
@@ -91,7 +107,7 @@ sub SingleFq(){
 
 sub Mean_Leng(){
 	my ($reads, $leng)=@_;
-	return sprintf("%.2f",$total_leng/$reads);
+	return( $reads==0 ? 0 : sprintf("%.2f",$total_leng/$reads));
 }
 
 sub N50(){
