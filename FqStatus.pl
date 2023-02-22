@@ -44,7 +44,6 @@ sub SingleFq(){
 		open(IN,"<$fq")||die "open file $fq:$!\n";
 		my @ln=<IN>; chomp @ln;
 		my $ln=scalar @ln;
-		print "$ln\n";
 		if( $ln ==0){
 			close IN;
 			return (0,0);
