@@ -27,7 +27,7 @@ foreach (keys %sq){
 
 my $output="";
 if (defined $ARGV[1]){
-	$output=$ARGV[0];
+	$output=$ARGV[1];
 }else{
 	$output="$ARGV[0].lengstat";
 }
