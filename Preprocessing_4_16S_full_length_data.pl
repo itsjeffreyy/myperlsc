@@ -92,7 +92,7 @@ foreach (@barcode){
 
 # conda environment activate
 &Create_conda_activate;
-
+&Create_info_sc($dir);
 
 # NanoPlot QC
 # raw data
@@ -172,6 +172,8 @@ foreach my $b (@barcode){
 #print "[MSG] Remove the raw fastq_pass and fastq_fail folder...\n";
 #system("rm -r $dir/fastq/fastq_*");
 
+system("bash $dir/info.sh");
+
 print STDOUT "[MSG] Finish processing\n\n";
 system("rm $my_script $act_script");
 ############################################################
@@ -224,3 +226,124 @@ EOF
 
 close OUT;
 }
+
+sub Create_info_sc(){
+my $out='info.sh';
+my $dir=shift @_;
+open (OUT,">$dir/$out" )|| die "Cannot create $dir/$out: $!\n";
+
+print OUT <<EOF;
+#!/bin/sh
+source ~/miniconda3/bin/activate base
+cd $dir
+ls fastq/barcode* | awk -F '/' '{print \$2}' | awk -F '.' '{print \$1}'  > tmp_list.txt
+while read i; do
+	echo \$i
+	fastp -i fastq/\${i}.fastq -q 10 -l 1300 --length_limit 1950 -o fastq/\${i}_filter.fastq
+done < tmp_list.txt
+
+source ~/miniconda3/bin/activate nanoplot
+while read i; do
+	NanoPlot --fastq fastq/\${i}_filter.fastq --plots dot --N50 -o NanoPlot_QC/\${i}_filter
+done < tmp_list.txt
+
+rm tmp_list.txt
+rm fastp.json
+rm fastp.html
+
+rm QC_info.tsv
+
+echo -e "Barcode\\tTotalBases_Raw\\tNumberOfReads_Raw\\tMeanReadLength_Raw\\tReadLengthN50_Raw\\tTotalBases_Pass\\tNumberOfReads_Pass\\tMeanReadLength_Pass\\tReadLengthN50_Pass\\tTotalBases_QC\\tNumberOfReads_QC\\tMeanReadLength_QC\\tReadLengthN50_QC\\tLossRate1(Raw2QC)\\tLossRate2(Pass2QC)" > QC_info.tsv
+
+ls NanoPlot_QC | awk -F '_' '{print \$1}' | sort | uniq > tmp.list
+
+while read i; do
+
+	echo -e "\${i}\\t\\c" >> QC_info.tsv
+
+	less NanoPlot_QC/\${i}_raw/NanoStats.txt | grep "Total bases" > tmp_\${i}_raw.txt
+	sed -i 's/ //g' tmp_\${i}_raw.txt
+	sed -i 's/Totalbases://g' tmp_\${i}_raw.txt
+	cat tmp_\${i}_raw.txt | tr '\\n' '\\t' >> QC_info.tsv
+
+	less NanoPlot_QC/\${i}_raw/NanoStats.txt | grep "Number of reads" > tmp_\${i}_raw_num.txt
+	sed -i 's/ //g' tmp_\${i}_raw_num.txt
+	sed -i 's/Numberofreads://g' tmp_\${i}_raw_num.txt
+	cat tmp_\${i}_raw_num.txt | tr '\\n' '\\t' >> QC_info.tsv
+
+	less NanoPlot_QC/\${i}_raw/NanoStats.txt | grep "Mean read length" > tmp_\${i}_raw.txt
+	sed -i 's/ //g' tmp_\${i}_raw.txt
+	sed -i 's/Meanreadlength://g' tmp_\${i}_raw.txt
+	cat tmp_\${i}_raw.txt | tr '\\n' '\\t' >> QC_info.tsv
+
+	less NanoPlot_QC/\${i}_raw/NanoStats.txt | grep "Read length N50" > tmp_\${i}_raw.txt
+	sed -i 's/ //g' tmp_\${i}_raw.txt
+	sed -i 's/ReadlengthN50://g' tmp_\${i}_raw.txt
+	cat tmp_\${i}_raw.txt | tr '\\n' '\\t' >> QC_info.tsv
+
+	less NanoPlot_QC/\${i}_pass/NanoStats.txt | grep "Total bases" > tmp_\${i}_pass.txt
+	sed -i 's/ //g' tmp_\${i}_pass.txt
+	sed -i 's/Totalbases://g' tmp_\${i}_pass.txt
+	cat tmp_\${i}_pass.txt | tr '\\n' '\\t' >> QC_info.tsv
+
+        less NanoPlot_QC/\${i}_pass/NanoStats.txt | grep "Number of reads" > tmp_\${i}_pass_num.txt
+	sed -i 's/ //g' tmp_\${i}_pass_num.txt
+	sed -i 's/Numberofreads://g' tmp_\${i}_pass_num.txt
+	cat tmp_\${i}_pass_num.txt | tr '\\n' '\\t' >> QC_info.tsv
+
+	less NanoPlot_QC/\${i}_pass/NanoStats.txt | grep "Mean read length" > tmp_\${i}_pass.txt
+	sed -i 's/ //g' tmp_\${i}_pass.txt
+	sed -i 's/Meanreadlength://g' tmp_\${i}_pass.txt
+	cat tmp_\${i}_pass.txt | tr '\\n' '\\t' >> QC_info.tsv
+
+	less NanoPlot_QC/\${i}_pass/NanoStats.txt | grep "Read length N50" > tmp_\${i}_pass.txt
+	sed -i 's/ //g' tmp_\${i}_pass.txt
+	sed -i 's/ReadlengthN50://g' tmp_\${i}_pass.txt
+	cat tmp_\${i}_pass.txt | tr '\\n' '\\t' >> QC_info.tsv
+
+	less NanoPlot_QC/\${i}_pass_filter/NanoStats.txt | grep "Total bases" > tmp_\${i}_pass_filter.txt
+	sed -i 's/ //g' tmp_\${i}_pass_filter.txt
+	sed -i 's/Totalbases://g' tmp_\${i}_pass_filter.txt
+	cat tmp_\${i}_pass_filter.txt | tr '\\n' '\\t' >> QC_info.tsv
+
+	less NanoPlot_QC/\${i}_pass_filter/NanoStats.txt | grep "Number of reads" > tmp_\${i}_pass_filter_num.txt
+	sed -i 's/ //g' tmp_\${i}_pass_filter_num.txt
+	sed -i 's/Numberofreads://g' tmp_\${i}_pass_filter_num.txt
+	cat tmp_\${i}_pass_filter_num.txt | tr '\\n' '\\t' >> QC_info.tsv
+
+	less NanoPlot_QC/\${i}_pass_filter/NanoStats.txt | grep "Mean read length" > tmp_\${i}_pass_filter.txt
+	sed -i 's/ //g' tmp_\${i}_pass_filter.txt
+	sed -i 's/Meanreadlength://g' tmp_\${i}_pass_filter.txt
+	cat tmp_\${i}_pass_filter.txt | tr '\\n' '\\t' >> QC_info.tsv
+
+	less NanoPlot_QC/\${i}_pass_filter/NanoStats.txt | grep "Read length N50" > tmp_\${i}_pass_filter.txt
+	sed -i 's/ //g' tmp_\${i}_pass_filter.txt
+	sed -i 's/ReadlengthN50://g' tmp_\${i}_pass_filter.txt
+	cat tmp_\${i}_pass_filter.txt | tr '\\n' '\\t' >> QC_info.tsv
+
+	sed -i 's/,//g' tmp_\${i}_raw_num.txt
+	sed -i 's/,//g' tmp_\${i}_pass_num.txt
+	sed -i 's/,//g' tmp_\${i}_pass_filter_num.txt
+	raw_num=\$(<tmp_\${i}_raw_num.txt)
+	pass_num=\$(<tmp_\${i}_pass_num.txt)
+	pass_filter_num=\$(<tmp_\${i}_pass_filter_num.txt)
+	echo -e "0\\c" >> QC_info.tsv
+	echo "scale=2; 1-\$pass_filter_num/\$raw_num" | bc | cat | tr '\\n' '\\t' >> QC_info.tsv
+	echo -e "0\\c" >> QC_info.tsv
+	echo "scale=2; 1-\$pass_filter_num/\$pass_num" | bc >> QC_info.tsv
+
+done < tmp.list
+
+rm tmp*
+
+EOF
+
+
+close OUT;
+}
+
+
+
+
+
+
