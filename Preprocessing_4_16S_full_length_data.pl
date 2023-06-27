@@ -239,7 +239,7 @@ cd $dir
 ls fastq/barcode* | awk -F '/' '{print \$2}' | awk -F '.' '{print \$1}'  > tmp_list.txt
 while read i; do
 	echo \$i
-	fastp -i fastq/\${i}.fastq -q 10 -l 1300 --length_limit 1950 -o fastq/\${i}_filter.fastq
+	nanoq -i fastq/\${i}.fastq --min-qual 10 --min-len 1300 --max-len 1950 -o fastq/\${i}_filter.fastq
 done < tmp_list.txt
 
 source ~/miniconda3/bin/activate nanoplot
@@ -248,9 +248,6 @@ while read i; do
 done < tmp_list.txt
 
 rm tmp_list.txt
-rm fastp.json
-rm fastp.html
-
 rm QC_info.tsv
 
 echo -e "Barcode\\tTotalBases_Raw\\tNumberOfReads_Raw\\tMeanReadLength_Raw\\tReadLengthN50_Raw\\tTotalBases_Pass\\tNumberOfReads_Pass\\tMeanReadLength_Pass\\tReadLengthN50_Pass\\tTotalBases_QC\\tNumberOfReads_QC\\tMeanReadLength_QC\\tReadLengthN50_QC\\tLossRate1(Raw2QC)\\tLossRate2(Pass2QC)" > QC_info.tsv
