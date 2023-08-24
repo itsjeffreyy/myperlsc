@@ -18,7 +18,7 @@ if($help){
 	print <<EOF;
 
 Usage:
-	Guppy_barcoder_statistic_GridION.pl -d path/to/guppy_barcoder/output_dir
+	Guppy_barcoder_statistic_rebasecalling.pl -d path/to/guppy_barcoder/output_dir
 Option:
 	-show_bc|-s : Show the number of barcodes [int. number]
 	-help|-h    : Show this message.
@@ -55,8 +55,8 @@ if($show_bc_num){
 #opendir DIR,"$barcoder_path" || die "Cannot open $barcoder_path: $!\n";
 #my @barcode_dir=grep{$_=~/^barcode/} readdir DIR;
 #closedir DIR;
-my @list_pass=`ls $barcoder_path/fastq_pass/`; chomp @list_pass;
-my @list_fail=`ls $barcoder_path/fastq_fail/`; chomp @list_fail;
+my @list_pass=`ls $barcoder_path/pass/`; chomp @list_pass;
+my @list_fail=`ls $barcoder_path/fail/`; chomp @list_fail;
 my %list=();
 foreach (@list_pass){
 	$list{$_}=1;
@@ -68,7 +68,7 @@ my @list=sort(keys %list);
 my @barcode_dir = grep {$_=~/(?:^barcode|^BC)/} @list;
 
 # check unclassified folder
-if(-e "$barcoder_path/fastq_pass/unclassified" || -e "$barcoder_path/fastq_fail/unclassified"){
+if(-e "$barcoder_path/pass/unclassified" || -e "$barcoder_path/fail/unclassified"){
 	push(@barcode_dir,'unclassified');
 }
 #print Dumper @barcode_dir;
@@ -82,27 +82,27 @@ foreach my $dir_n (@barcode_dir){
 	
 	my @pass_fq_fs=();
 	my @fail_fq_fs=();
-	if(-e "$barcoder_path/fastq_pass/$dir_n"){
-		opendir (DIR,"$barcoder_path/fastq_pass/$dir_n") || die "Cannot open $barcoder_path/fastq_pass/$dir_n: $!\n";
+	if(-e "$barcoder_path/pass/$dir_n"){
+		opendir (DIR,"$barcoder_path/pass/$dir_n") || die "Cannot open $barcoder_path/pass/$dir_n: $!\n";
 		@pass_fq_fs=grep {$_=~/\.fastq*|\.fq*/} readdir DIR;
 		closedir DIR;
 	}
 
-	if(-e "$barcoder_path/fastq_fail/$dir_n"){
-		opendir (DIR,"$barcoder_path/fastq_fail/$dir_n") || die "Cannot open $barcoder_path/fastq_fail/$dir_n: $!\n";
+	if(-e "$barcoder_path/fail/$dir_n"){
+		opendir (DIR,"$barcoder_path/fail/$dir_n") || die "Cannot open $barcoder_path/fail/$dir_n: $!\n";
 		@fail_fq_fs=grep {$_=~/\.fastq*|\.fq*/} readdir DIR;
 		closedir DIR;
 	}
 
 	foreach my $fq (@pass_fq_fs){
-		if(! -e "$barcoder_path/fastq_pass/$dir_n/$fq"){next;}
-		my($readnum,$basenum)=&SingleFq("$barcoder_path/fastq_pass/$dir_n/$fq");
+		if(! -e "$barcoder_path/pass/$dir_n/$fq"){next;}
+		my($readnum,$basenum)=&SingleFq("$barcoder_path/pass/$dir_n/$fq");
 		$barcode_readnum{$dir_n}+=$readnum;
 		$barcode_basenum{$dir_n}+=$basenum;
 	}
 	foreach my $fq (@fail_fq_fs){
-		if(! -e "$barcoder_path/fastq_fail/$dir_n/$fq"){next;}
-		my($readnum,$basenum)=&SingleFq("$barcoder_path/fastq_fail/$dir_n/$fq");
+		if(! -e "$barcoder_path/fail/$dir_n/$fq"){next;}
+		my($readnum,$basenum)=&SingleFq("$barcoder_path/fail/$dir_n/$fq");
 		$barcode_readnum{$dir_n}+=$readnum;
 		$barcode_basenum{$dir_n}+=$basenum;
 	}
