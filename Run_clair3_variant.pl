@@ -39,7 +39,7 @@ if($help){
 	&Help;
 }
 
-if(!$bam){
+unless($bam || $sam){
 	if(!$ref || !$fq){
 		print "ERR: No $bam, $ref or $fq!\n"; 
 		&Help;
@@ -54,7 +54,7 @@ $output_dir=`readlink -f $output_dir`; chomp $output_dir;
 # docker 
 #my $docker_cmd="docker run -it   -v $input_dir:$input_dir   -v $output_dir:$output_dir hkubal/clair3:latest  ";
 #my $docker_cmd="docker run  --rm  -v $input_dir:$input_dir   -v $output_dir:$output_dir minimap2_clair3:20231121  ";
-my $docker_cmd="docker run  --rm  -v $input_dir:$input_dir    minimap2_clair3:20231121  ";
+my $docker_cmd="docker run  --rm  -v $input_dir:$input_dir    itsjeffreyy/minimap2_clair3:20231121  ";
 
 # minimap2 alignment
 my $mm2_cmd="minimap2 -t $threads -ax map-ont $input_dir/$ref $input_dir/$fq -o $input_dir/$out_prefix.sam";
